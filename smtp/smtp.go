@@ -12,6 +12,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var emailCounter int = 0
+
 // The Backend implements SMTP server methods.
 type Backend struct{}
 
@@ -46,6 +48,8 @@ func (s *Session) Data(r io.Reader) error {
 		return nil
 	}
 
+	emailCounter += 1
+
 	addresses := ""
 
 	alist, _ := env.AddressList("To")
@@ -58,6 +62,7 @@ func (s *Session) Data(r io.Reader) error {
 		"to":       addresses,
 		"len_txt":  strconv.Itoa(len(env.Text)),
 		"len_html": strconv.Itoa(len(env.HTML)),
+		"counter":  emailCounter,
 	}).Info("Email received")
 
 	return nil
@@ -74,7 +79,7 @@ func SmtpServer() *smtp.Server {
 
 	s := smtp.NewServer(be)
 
-	s.Addr = ":2525"
+	s.Addr = "0.0.0.0:2525"
 	s.Domain = "ktnrs.com"
 	s.ReadTimeout = 30 * time.Second
 	s.WriteTimeout = 30 * time.Second

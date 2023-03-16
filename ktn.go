@@ -18,7 +18,7 @@ func main() {
 
 	smtpSrv := smtp.SmtpServer()
 	go func() {
-		log.Info("Starting SMTP Server on port ", smtpSrv.Addr)
+		log.Info("Starting SMTP Server at smtp://", smtpSrv.Addr)
 		if err := smtpSrv.ListenAndServe(); err != nil {
 			log.Fatalf("SMTP Server failure: %s\n", err)
 		}
@@ -27,7 +27,7 @@ func main() {
 	httpSrv := web.HttpServer()
 	go func() {
 		// service connections
-		log.Info("Starting HTTP Server on port ", httpSrv.Addr)
+		log.Info("Starting HTTP Server at http://", httpSrv.Addr)
 		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("HTTP Server failure: %s\n", err)
 		}

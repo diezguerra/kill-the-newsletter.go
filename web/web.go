@@ -15,7 +15,9 @@ import (
 
 func HttpServer() *http.Server {
 	r := gin.Default()
-	//r.LoadHTMLGlob("web/templates/*.html")
+
+	r.Static("/static", "./web/static")
+
 	r.GET("/", func(c *gin.Context) {
 		idxTmpl, err := htemplate.ParseFiles(
 			"web/templates/base.tmpl",
@@ -67,7 +69,7 @@ func HttpServer() *http.Server {
 	})
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    "0.0.0.0:8080",
 		Handler: r,
 	}
 
