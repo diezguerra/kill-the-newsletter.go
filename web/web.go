@@ -2,7 +2,8 @@ package ktn
 
 import (
 	"bytes"
-	ktn "ktn-go/models"
+	models "ktn-go/models"
+	handlers "ktn-go/web/handlers"
 	"net/http"
 
 	htemplate "html/template"
@@ -39,7 +40,7 @@ func HttpServer() *http.Server {
 		})
 	})
 
-	r.GET("/feed/asdf.xml", func(c *gin.Context) {
+	r.GET("/feeds/asdf.xml", func(c *gin.Context) {
 
 		atomFeed, err := ttemplate.ParseFiles("web/templates/atom.xml")
 		if err != nil {
@@ -49,7 +50,7 @@ func HttpServer() *http.Server {
 
 		executedFeed := new(bytes.Buffer)
 
-		feedTmpl := ktn.Feed{
+		feedTmpl := models.Feed{
 			WebUrl:        "ktngo.com",
 			FeedReference: "asdf",
 			FeedTitle:     "Asdf",
@@ -67,6 +68,8 @@ func HttpServer() *http.Server {
 			Data:        executedFeed.Bytes(),
 		})
 	})
+
+	r.GET("/feeds/:ref", handlers.GetFeedHtml)
 
 	srv := &http.Server{
 		Addr:    "0.0.0.0:8080",

@@ -10,10 +10,16 @@ import (
 	"syscall"
 	"time"
 
+	config "ktn-go/config"
+
+	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	config.LoadConfig()
+
 	log.Println("Starting KTN Server...")
 
 	smtpSrv := smtp.SmtpServer()
