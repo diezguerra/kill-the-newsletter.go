@@ -1,6 +1,7 @@
 package web
 
 import (
+	"html/template"
 	models "ktn-go/models"
 	"net/http"
 	"strings"
@@ -11,21 +12,20 @@ import (
 )
 
 func GetFeedHtml(c *gin.Context) {
-	entry := models.ORMEntry{}
+	feed := models.ORMFeed{}
 	ref := strings.Split(c.Param("ref"), ".")[0]
-	if err := entry.GetRef(ref); err != nil {
-		log.Info("404", err)
+	if err := feed.GetRef(ref); err != nil {
+		log.Info("404: ", err)
+		c.Render(http.StatusNotFound, render.Data{})
+		return
 	}
-	log.Info("Entry for ref ", ref, entry)
 
-	tmpl, err := models.RenderTemplate(map[string]interface{}{
-		"Reference":   ref,
-		"WebUrl":      "ktnrs.com",
-		"EmailDomain": "ktnrs.com",
-		"Entry":       entry,
+	tmpl, err := models.RenderHTMLTemplate(map[string]interface{}{
+		"Reference": ref,
+		"Entry":     template.HTML(feed.SentinelEntry()),
 	}, []string{
-		"../templates/base.tmpl",
-		"../templates/created.tmpl"})
+		"web/templates/base.tmpl",
+		"web/templates/created.tmpl"})
 
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)

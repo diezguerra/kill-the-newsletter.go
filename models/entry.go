@@ -18,32 +18,42 @@ type Entry struct {
 
 type ORMEntry struct {
 	Id        int    `db:"id" json:"id"`
-	CreatedAt string `db:"createdAt" json:"created_at"`
-	UpdatedAt string `db:"updatedAt" json:"updated_at"`
+	CreatedAt string `db:"created_at" json:"created_at"`
+	UpdatedAt string `db:"updated_at" json:"updated_at"`
 	Reference string `db:"reference" json:"reference"`
 	Title     string `db:"title" json:"title"`
 	Author    string `db:"author" json:"author"`
-	Contenet  string `db:"content" json:"content"`
+	Content   string `db:"content" json:"content"`
 }
 
-func (e ORMEntry) GetRef(ref string) error {
-	log.Info("Getting Entry for ref", ref)
-	err := config.DB.Get(&e, "select from entries where reference = $1 LIMIT 1", ref)
+func (e *ORMEntry) GetRef(ref string) error {
+	log.Info("Fetching Entry db record for ref", ref)
+	err := config.DB.Get(e, "select * from entries where reference = $1 LIMIT 1", ref)
 
 	if err != nil {
-		log.Info("Failed to find Entry with Reference ", ref)
+		log.Info("Failed to find Entry in db with Reference ", ref)
 	}
 
 	return err
 }
 
-func (e ORMEntry) String() string {
-	tmpl, err := RenderTemplate(e, []string{
-		"../web/templates/sentinel_entry.tmpl",
+func (e *ORMEntry) String() string {
+	tmplVars := map[string]string{
+		"CreatedAt": e.CreatedAt,
+		"UpdatedAt": e.UpdatedAt,
+		"Reference": e.Reference,
+		"Title":     e.Title,
+		"Author":    e.Author,
+		"Content":   e.Content}
+
+	tmpl, err := RenderTemplate(tmplVars, []string{
+		"web/templates/sentinel_entry.tmpl",
 	})
+
 	if err != nil {
 		return err.Error()
 	}
+
 	return string(tmpl)
 
 }

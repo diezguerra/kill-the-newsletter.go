@@ -15,11 +15,11 @@ package models
 import (
 	"errors"
 	"fmt"
+	"ktn-go/config"
 	"math/rand"
 
 	"github.com/jmoiron/sqlx"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 type Feed struct {
@@ -45,10 +45,21 @@ func (f Feed) CreatedAtRfc3339() string {
 
 type ORMFeed struct {
 	ID        int    `db:"id" json:"id"`
-	CreatedAt string `db:"createdAt" json:"created_at"`
-	UpdatedAt string `db:"updatedAt" json:"updated_at"`
+	CreatedAt string `db:"created_at" json:"created_at"`
+	UpdatedAt string `db:"updated_at" json:"updated_at"`
 	Reference string `db:"reference" json:"reference"`
 	Title     string `db:"title" json:"title"`
+}
+
+func (e *ORMFeed) GetRef(ref string) error {
+	log.Info("Fetching Feed db record for ref", ref)
+	err := config.DB.Get(e, "select * from feeds where reference = $1 LIMIT 1", ref)
+
+	if err != nil {
+		log.Info("Failed to find Feed in db with Reference ", ref)
+	}
+
+	return err
 }
 
 // Returns a `Feed`'s `title` given its `reference`.
@@ -78,6 +89,21 @@ func (f ORMFeed) NewReference() string {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+func (f *ORMFeed) SentinelEntry() string {
+	content := map[string]interface{}{
+		"Reference": f.Reference,
+		"Title":     f.Title,
+	}
+
+	rendered, err := RenderHTMLTemplate(content, []string{"web/templates/sentinel_entry.tmpl"})
+	if err != nil {
+		log.Error("KTemplate: Couldn't render sentinel template: ", err)
+		return ""
+	}
+
+	return string(rendered)
 }
 
 func (f *ORMFeed) Save(db *sqlx.DB) (string, error) {
@@ -115,22 +141,9 @@ func (f *ORMFeed) Save(db *sqlx.DB) (string, error) {
 		return "", errors.New("could not create new feed")
 	}
 
-	content := struct {
-		WebUrl      string
-		EmailDomain string
-		Reference   string
-		Title       string
-	}{
-		EmailDomain: viper.GetString("domain"),
-		Reference:   f.Reference,
-		Title:       f.Title,
-		WebUrl:      viper.GetString("web_url"),
-	}
-
-	rendered, err := RenderTemplate(content, []string{"sentinel_entry.tmpl"})
-	if err != nil {
-		log.Error("KTemplate: Couldn't render sentinel template: ", err)
-		return "", err
+	rendered := f.SentinelEntry()
+	if len(rendered) == 0 {
+		return "", errors.New("couldn't render sentinel entry")
 	}
 
 	entryTitle := fmt.Sprintf("%s inbox created!", f.Title)
