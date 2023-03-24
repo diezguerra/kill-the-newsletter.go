@@ -23,11 +23,11 @@ import (
 )
 
 type Feed struct {
-	WebUrl        string
-	FeedReference string
-	FeedTitle     string
-	EmailDomain   string
-	Entries       []Entry
+	WebUrl      string
+	Reference   string
+	Title       string
+	EmailDomain string
+	Entries     []Entry
 }
 
 type NewFeed struct {
@@ -35,7 +35,7 @@ type NewFeed struct {
 	Reference string
 }
 
-func (f Feed) FeedUpdatedAtRfc3339() string {
+func (f Feed) UpdatedAtRfc3339() string {
 	return "some date"
 }
 
