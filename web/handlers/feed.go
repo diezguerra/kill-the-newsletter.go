@@ -15,7 +15,7 @@ import (
 
 func GetFeed(c *gin.Context) {
 	if strings.HasSuffix(c.Param("ref"), ".xml") {
-		GetFeedXML(c)
+		GetFeedXml(c)
 	} else {
 		GetFeedHtml(c)
 	}
@@ -48,7 +48,7 @@ func GetFeedHtml(c *gin.Context) {
 
 }
 
-func GetFeedXML(c *gin.Context) {
+func GetFeedXml(c *gin.Context) {
 	feed := models.ORMFeed{}
 	ref := strings.Split(c.Param("ref"), ".")[0]
 	if err := feed.GetRef(ref); err != nil {

@@ -82,12 +82,17 @@ func (f *ORMFeed) FeedExists(reference string, db *sqlx.DB) (bool, error) {
 	return count > 0, nil
 }
 
-func (f ORMFeed) NewReference() string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+func (f *ORMFeed) NewReference() string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, 16)
 	for i := range b {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
+
+	if len(f.Reference) == 0 {
+		f.Reference = string(b)
+	}
+
 	return string(b)
 }
 
@@ -106,13 +111,12 @@ func (f *ORMFeed) SentinelEntry() string {
 	return string(rendered)
 }
 
-func (f *ORMFeed) Save(db *sqlx.DB) (string, error) {
-	reference := f.Reference
+func (f *ORMFeed) Save() (string, error) {
 	if len(f.Reference) <= 0 {
 		f.Reference = f.NewReference()
 	}
 
-	tx, err := db.Beginx()
+	tx, err := config.DB.Beginx()
 	if err != nil {
 		return "", err
 	}
@@ -148,10 +152,10 @@ func (f *ORMFeed) Save(db *sqlx.DB) (string, error) {
 
 	entryTitle := fmt.Sprintf("%s inbox created!", f.Title)
 	_, err = tx.Exec("INSERT INTO entries (reference, title, author, content) VALUES ($1, $2, $3, $4)",
-		reference, entryTitle, "Kill The Newsletter", rendered)
+		f.Reference, entryTitle, "Kill The Newsletter", rendered)
 	if err != nil {
 		return "", err
 	}
 
-	return reference, nil
+	return f.Reference, nil
 }
