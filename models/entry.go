@@ -38,7 +38,7 @@ func (e *ORMEntry) GetRef(ref string) error {
 }
 
 func (e *ORMEntry) String() string {
-	tmplVars := map[string]string{
+	tmplVars := map[string]interface{}{
 		"CreatedAt": e.CreatedAt,
 		"UpdatedAt": e.UpdatedAt,
 		"Reference": e.Reference,

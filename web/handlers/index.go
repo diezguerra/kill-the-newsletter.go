@@ -11,7 +11,7 @@ import (
 )
 
 func GetIndex(c *gin.Context) {
-	tmpl, err := models.RenderHTMLTemplate(map[string]interface{}{}, []string{
+	tmpl, err := models.RenderTemplate(map[string]interface{}{}, []string{
 		"web/templates/base.tmpl",
 		"web/templates/index.tmpl"})
 

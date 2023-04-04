@@ -102,7 +102,7 @@ func (f *ORMFeed) SentinelEntry() string {
 		"Title":     f.Title,
 	}
 
-	rendered, err := RenderHTMLTemplate(content, []string{"web/templates/sentinel_entry.tmpl"})
+	rendered, err := RenderTemplate(content, []string{"web/templates/sentinel_entry.tmpl"})
 	if err != nil {
 		log.Error("KTemplate: Couldn't render sentinel template: ", err)
 		return ""

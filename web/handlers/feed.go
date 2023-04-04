@@ -1,12 +1,10 @@
 package web
 
 import (
-	"bytes"
 	"html/template"
 	models "ktn-go/models"
 	"net/http"
 	"strings"
-	ttemplate "text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
@@ -30,7 +28,7 @@ func GetFeedHtml(c *gin.Context) {
 		return
 	}
 
-	tmpl, err := models.RenderHTMLTemplate(map[string]interface{}{
+	tmpl, err := models.RenderTemplate(map[string]interface{}{
 		"Reference": ref,
 		"Entry":     template.HTML(feed.SentinelEntry()),
 	}, []string{
@@ -57,30 +55,23 @@ func GetFeedXml(c *gin.Context) {
 		return
 	}
 
-	atomFeed, err := ttemplate.ParseFiles("web/templates/atom.xml")
+	feedTmpl := map[string]interface{}{
+		"Reference": "asdf",
+		"Title":     "Asdf",
+		"Entries":   nil,
+	}
+
+	tmpl, err := models.RenderTemplate(feedTmpl, []string{
+		"web/templates/atom.xml"})
+
 	if err != nil {
-		log.Error("KTN Web: Couldn't load Atom feed template: ", err)
-		c.AbortWithError(http.StatusInternalServerError, err)
-	}
-
-	executedFeed := new(bytes.Buffer)
-
-	feedTmpl := models.Feed{
-		WebUrl:      "ktngo.com",
-		Reference:   "asdf",
-		Title:       "Asdf",
-		EmailDomain: "ktngo.com",
-		Entries:     nil,
-	}
-
-	if err := atomFeed.Execute(executedFeed, feedTmpl); err != nil {
 		log.Error("KTN Web: Couldn't execute feed template: ", err)
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
 	c.Render(http.StatusOK, render.Data{
 		ContentType: "application/atom+xml; charset=utf-8",
-		Data:        executedFeed.Bytes(),
+		Data:        tmpl,
 	})
 
 }
