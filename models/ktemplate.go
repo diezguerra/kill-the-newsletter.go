@@ -34,11 +34,9 @@ func RenderTemplate(data map[string]interface{}, files []string) ([]byte, error)
 	templData := make(map[string]interface{})
 	for key, value := range data {
 		templData[key] = value
-		log.Info(key, "=", value)
 	}
 	for key, value := range config.TemplateVariables {
 		templData[key] = value
-		log.Info(key, "=", value)
 	}
 
 	executedTmpl := new(bytes.Buffer)

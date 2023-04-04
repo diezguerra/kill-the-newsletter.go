@@ -16,20 +16,22 @@
     Kill the Newsletter! Inbox:
     {{ .Reference }}@{{ .EmailDomain }} →
     {{ .WebUrl }}/feeds/{{ .Reference }}.xml
-</subtitle >
+</subtitle>
 <updated>{{ .UpdatedAtRfc3339 }}</updated>
 <author><name>Kill the Newsletter!</name></author>
 
+{{ $WebUrl := .WebUrl }}
+{{ $Reference := .Reference }}
 {{ range .Entries }}
     <entry>
         <id>urn:kill-the-newsletter:{{ .Reference }}:{{ .Id }}</id>
         <title>{{ .Title }}</title>
         <author><name>{{ .Author }}</name></author>
-        <updated>{{ .CreatedAtRfc3339 }}</updated>
+        <updated>{{ .UpdatedAtRfc3339 }}</updated>
         <link
         rel="alternate"
         type="text/html"
-        href="{{ .WebUrl }}/alternates/{{ .Reference }}.html"
+        href="{{ $WebUrl }}/alternates/{{ $Reference }}.html"
         />
         <content type="html">{{ .Content }}</content>
     </entry>

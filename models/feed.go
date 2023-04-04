@@ -35,14 +35,6 @@ type NewFeed struct {
 	Reference string
 }
 
-func (f Feed) UpdatedAtRfc3339() string {
-	return "some date"
-}
-
-func (f Feed) CreatedAtRfc3339() string {
-	return "some date"
-}
-
 type ORMFeed struct {
 	ID        int    `db:"id" json:"id"`
 	CreatedAt string `db:"created_at" json:"created_at"`
@@ -52,7 +44,6 @@ type ORMFeed struct {
 }
 
 func (e *ORMFeed) GetRef(ref string) error {
-	log.Info("Fetching Feed db record for ref", ref)
 	err := config.DB.Get(e, "select * from feeds where reference = $1 LIMIT 1", ref)
 
 	if err != nil {
@@ -80,6 +71,21 @@ func (f *ORMFeed) FeedExists(reference string, db *sqlx.DB) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (f *ORMFeed) UpdatedAtRfc3339() string {
+	entry := ORMEntry{}
+	err := config.DB.Get(
+		&entry,
+		"select * from entries where reference = $1 ORDER BY id DESC LIMIT 1",
+		f.Reference)
+
+	if err != nil {
+		log.Info("Failed to find Entries in db with Reference ", f.Reference)
+		return ""
+	}
+
+	return entry.CreatedAt
 }
 
 func (f *ORMFeed) NewReference() string {

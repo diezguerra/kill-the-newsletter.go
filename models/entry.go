@@ -19,7 +19,6 @@ type Entry struct {
 type ORMEntry struct {
 	Id        int    `db:"id" json:"id"`
 	CreatedAt string `db:"created_at" json:"created_at"`
-	UpdatedAt string `db:"updated_at" json:"updated_at"`
 	Reference string `db:"reference" json:"reference"`
 	Title     string `db:"title" json:"title"`
 	Author    string `db:"author" json:"author"`
@@ -37,10 +36,15 @@ func (e *ORMEntry) GetRef(ref string) error {
 	return err
 }
 
+func (e *ORMEntry) UpdatedAtRfc3339() string {
+	feedUpdatedAt, _ := ConvertToRFC3339(e.CreatedAt)
+	return feedUpdatedAt
+}
+
 func (e *ORMEntry) String() string {
+
 	tmplVars := map[string]interface{}{
 		"CreatedAt": e.CreatedAt,
-		"UpdatedAt": e.UpdatedAt,
 		"Reference": e.Reference,
 		"Title":     e.Title,
 		"Author":    e.Author,

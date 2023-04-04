@@ -2,6 +2,7 @@ package web
 
 import (
 	"html/template"
+	"ktn-go/config"
 	models "ktn-go/models"
 	"net/http"
 	"strings"
@@ -55,10 +56,17 @@ func GetFeedXml(c *gin.Context) {
 		return
 	}
 
+	entries := []models.ORMEntry{}
+	config.DB.Select(
+		&entries, "select * from entries where reference = $1 order by id desc", feed.Reference)
+
+	feedUpdated, err := models.ConvertToRFC3339(feed.UpdatedAtRfc3339())
+
 	feedTmpl := map[string]interface{}{
-		"Reference": "asdf",
-		"Title":     "Asdf",
-		"Entries":   nil,
+		"Reference":        feed.Reference,
+		"Title":            feed.Title,
+		"UpdatedAtRfc3339": feedUpdated,
+		"Entries":          entries,
 	}
 
 	tmpl, err := models.RenderTemplate(feedTmpl, []string{
